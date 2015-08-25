@@ -15,7 +15,7 @@
     "bower.json"
   ],
   "typescript": {
-    "definition": "typings/leaflet-mvt.d.ts"
+    "definition": "exported_typings/leaflet-mvt.d.ts"
   },
   "dependencies": {
     "leaflet": "~0.7.3"
