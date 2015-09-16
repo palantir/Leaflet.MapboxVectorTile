@@ -60,6 +60,7 @@ declare module LeafletMVT {
         style?: LeafletMVT.StyleFunction | {[name: string]: LeafletMVT.StyleFunction};
         visibleLayers?: string[] | {[name: string]: string};
         onClick?: (e: L.LeafletMouseEvent) => any;
+        buffer?: number;
     }
 }
 
