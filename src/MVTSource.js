@@ -12,7 +12,8 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
     url: "", //URL TO Vector Tile Source,
     getIDForLayerFeature: function() {},
     tileSize: 256,
-    visibleLayers: null
+    visibleLayers: null,
+    buffer: 5
   },
   layers: {}, //Keep a list of the layers contained in the PBFs
   processedTiles: {}, //Keep a list of tiles that have been processed already
@@ -300,7 +301,8 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
       layerOrdering: self.options.layerOrdering,
       style: style,
       name: key,
-      asynch: true
+      asynch: true,
+      buffer: self.options.buffer
     };
 
     if (self.options.zIndex) {
