@@ -13,7 +13,8 @@ module.exports = L.TileLayer.Canvas.extend({
     isHiddenLayer: false,
     getIDForLayerFeature: function() {},
     tileSize: 256,
-    lineClickTolerance: 2
+    lineClickTolerance: 2,
+    buffer: 5
   },
 
   _featureIsClicked: {},
@@ -190,7 +191,10 @@ module.exports = L.TileLayer.Canvas.extend({
       /**
        * Index the feature by bounding box into rbush.
        */
-      var box = bbox(vtf, layerCtx.tileSize, uniqueID);
+      var buffer = 0;
+      // add buffer to index for points (ignore for other types)
+      if (vtf.type === 1) { buffer = self.options.buffer; }
+      var box = bbox(vtf, layerCtx.tileSize, uniqueID, buffer);
       toIndex.push(box);
 
       /**
@@ -438,7 +442,7 @@ module.exports = L.TileLayer.Canvas.extend({
 
 });
 
-function bbox(vtf, tileSize, id) {
+function bbox(vtf, tileSize, id, buffer) {
   var divisor = vtf.extent / tileSize;
 
   var minX = Number.POSITIVE_INFINITY;
@@ -456,6 +460,12 @@ function bbox(vtf, tileSize, id) {
     });
   });
 
+  if (buffer > 0) {
+    minX -= buffer;
+    maxX += buffer;
+    minY -= buffer;
+    maxY += buffer;
+  }
   var box = [minX, minY, maxX, maxY];
   box.id = id;
   return box;
