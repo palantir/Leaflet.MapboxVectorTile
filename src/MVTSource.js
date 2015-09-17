@@ -435,7 +435,7 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
       }
     }
 
-    var feature = this._featureAt(evt.layerPoint, layers);
+    var feature = this._featureAt(evt.containerPoint, layers);
     if (feature && feature.toggleEnabled) {
       feature.toggle();
     }
