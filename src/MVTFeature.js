@@ -36,6 +36,9 @@ function MVTFeature(mvtLayer, vtf, ctx, id, style) {
   //An object to store the paths and contexts for this feature
   this.tiles = {};
 
+  // TODO: think about this design
+  this.mvtLayer.imgCache = this.mvtLayer.imgCache || {};
+
   this.style = style;
 
   //Add to the collection
@@ -252,6 +255,29 @@ MVTFeature.prototype._drawPoint = function(ctx, coordsArray, style) {
 
   var tile = this.tiles[ctx.id];
 
+  var p = this._tilePoint(coordsArray[0][0]);
+  var c = ctx.canvas;
+  var ctx2d;
+
+  try {
+    ctx2d = c.getContext('2d');
+  }
+  catch(e) {
+    console.log("_drawPoint error: " + e);
+    return;
+  }
+
+  if ('iconUrl' in style){
+    this._drawPointIcon(ctx, ctx2d, p, style); 
+  } else {
+    this._drawPointCircle(ctx, ctx2d, p, style);
+  }
+
+  tile.paths.push([p]);
+};
+
+MVTFeature.prototype._drawPointCircle = function(ctx, ctx2d, p, style) {
+
   //Get radius
   var radius = 1;
   if (typeof style.radius === 'function') {
@@ -259,17 +285,6 @@ MVTFeature.prototype._drawPoint = function(ctx, coordsArray, style) {
   }
   else{
     radius = style.radius;
-  }
-
-  var p = this._tilePoint(coordsArray[0][0]);
-  var c = ctx.canvas;
-  var ctx2d;
-  try{
-    ctx2d = c.getContext('2d');
-  }
-  catch(e){
-    console.log("_drawPoint error: " + e);
-    return;
   }
 
   ctx2d.beginPath();
@@ -285,8 +300,39 @@ MVTFeature.prototype._drawPoint = function(ctx, coordsArray, style) {
   }
 
   ctx2d.restore();
-  tile.paths.push([p]);
 };
+
+MVTFeature.prototype._drawPointIcon = function(ctx, ctx2d, p, style){
+
+    var url = style.iconUrl;
+    var img;
+    if (!(url in this.mvtLayer.imgCache)){
+        img = new Image();
+        img.src = url;
+        this.mvtLayer.imgCache[url] = img;
+    } else {
+        img = this.mvtLayer.imgCache[url];
+    }
+
+    //Get radius
+    var radius = 1;
+    if (typeof style.radius === 'function') {
+      radius = style.radius(ctx.zoom); //Allows for scale dependent rednering
+    }
+    else {
+      radius = style.radius;
+    }
+
+    if (img.complete){
+        ctx2d.drawImage(img, p.x - radius, p.y - radius, radius*2, radius*2);
+    } else {
+        (function(x,y){
+            $(img).load(function(){
+                ctx2d.drawImage(this, x - radius, y - radius, radius*2, radius*2);
+            });
+        })(p.x, p.y);
+    }
+}
 
 MVTFeature.prototype._drawLineString = function(ctx, coordsArray, style) {
   if (!style) return;

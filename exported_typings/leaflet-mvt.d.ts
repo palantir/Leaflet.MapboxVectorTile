@@ -4,6 +4,7 @@ declare module LeafletMVT {
     interface PointBaseStyle {
         color: string;
         radius: number;
+        iconUrl?: string;
     }
 
     export interface PointStyle extends PointBaseStyle, Style {

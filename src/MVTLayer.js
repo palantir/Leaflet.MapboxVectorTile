@@ -2,7 +2,9 @@
  * Created by Ryan Whitley on 5/17/14.
  */
 /** Forked from https://gist.github.com/DGuidi/1716010 **/
+
 var MVTFeature = require('./MVTFeature');
+
 var Util = require('./MVTUtil');
 var rbush = require('rbush');
 
@@ -14,7 +16,7 @@ module.exports = L.TileLayer.Canvas.extend({
     getIDForLayerFeature: function() {},
     tileSize: 256,
     lineClickTolerance: 2,
-    buffer: 5
+    buffer: 5,
   },
 
   _featureIsClicked: {},
@@ -208,6 +210,7 @@ module.exports = L.TileLayer.Canvas.extend({
 
       //Create a new MVTFeature if one doesn't already exist for this feature.
       if (!mvtFeature) {
+
         //Get a style for the feature - set it just once for each new MVTFeature
         var style = self.style(vtf);
 
