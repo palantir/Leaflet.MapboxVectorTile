@@ -5,7 +5,16 @@
 var Util = require('./MVTUtil');
 var StaticLabel = require('./StaticLabel/StaticLabel.js');
 
-module.exports = MVTFeature;
+var constants = {
+        POINT_CIRCLE: "pt_circle",
+        POINT_ICON: "pt_icon",
+        DEFAULT_ICON_URL: "https://qph.is.quoracdn.net/main-qimg-c73e4e4396325a9e636ad2b94b64601f?convert_to_webp=true"
+};
+
+module.exports = {
+    MVTFeature: MVTFeature,
+    constants: constants
+};
 
 function MVTFeature(mvtLayer, vtf, ctx, id, style) {
   if (!vtf) return null;
@@ -35,6 +44,7 @@ function MVTFeature(mvtLayer, vtf, ctx, id, style) {
 
   //An object to store the paths and contexts for this feature
   this.tiles = {};
+  this.mvtLayer.imgCache = {};
 
   this.style = style;
 
@@ -252,6 +262,29 @@ MVTFeature.prototype._drawPoint = function(ctx, coordsArray, style) {
 
   var tile = this.tiles[ctx.id];
 
+  var p = this._tilePoint(coordsArray[0][0]);
+  var c = ctx.canvas;
+  var ctx2d;
+
+  try {
+    ctx2d = c.getContext('2d');
+  }
+  catch(e) {
+    console.log("_drawPoint error: " + e);
+    return;
+  }
+
+  if (style.pointType === constants.POINT_CIRCLE){
+    this._drawPointCircle(ctx, ctx2d, p, style);
+  } else {
+    this._drawPointIcon(ctx, ctx2d, p, style); 
+  }
+
+  tile.paths.push([p]);
+};
+
+MVTFeature.prototype._drawPointCircle = function(ctx, ctx2d, p, style) {
+
   //Get radius
   var radius = 1;
   if (typeof style.radius === 'function') {
@@ -259,17 +292,6 @@ MVTFeature.prototype._drawPoint = function(ctx, coordsArray, style) {
   }
   else{
     radius = style.radius;
-  }
-
-  var p = this._tilePoint(coordsArray[0][0]);
-  var c = ctx.canvas;
-  var ctx2d;
-  try{
-    ctx2d = c.getContext('2d');
-  }
-  catch(e){
-    console.log("_drawPoint error: " + e);
-    return;
   }
 
   ctx2d.beginPath();
@@ -285,8 +307,31 @@ MVTFeature.prototype._drawPoint = function(ctx, coordsArray, style) {
   }
 
   ctx2d.restore();
-  tile.paths.push([p]);
 };
+
+MVTFeature.prototype._drawPointIcon = function(ctx, ctx2d, p, style){
+
+    var url = style.iconUrl || constants.DEFAULT_ICON_URL;
+    var $img;
+    if (!(url in this.mvtLayer.imgCache)){
+        $img = $(new Image()).attr('src', url);
+        this.mvtLayer.imgCache[url] = $img;
+    } else {
+        $img = this.mvtLayer.imgCache[url];
+    }
+
+    // TODO: configure size (via radius?)
+    var img = $img.get(0);
+    if (img.complete){
+        ctx2d.drawImage(img, p.x, p.y, 20, 20);
+    } else {
+        (function(x,y){
+            $img.load(function(){
+                ctx2d.drawImage(this, x, y, 20, 20);
+            });
+        })(p.x, p.y);
+    }
+}
 
 MVTFeature.prototype._drawLineString = function(ctx, coordsArray, style) {
   if (!style) return;

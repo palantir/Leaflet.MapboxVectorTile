@@ -2,7 +2,12 @@
  * Created by Ryan Whitley on 5/17/14.
  */
 /** Forked from https://gist.github.com/DGuidi/1716010 **/
-var MVTFeature = require('./MVTFeature');
+
+//TODO: jank
+var _MVTFeature = require('./MVTFeature');
+MVTFeature = _MVTFeature.MVTFeature;
+MVTFeature.constants = _MVTFeature.constants;
+
 var Util = require('./MVTUtil');
 var rbush = require('rbush');
 
@@ -14,7 +19,7 @@ module.exports = L.TileLayer.Canvas.extend({
     getIDForLayerFeature: function() {},
     tileSize: 256,
     lineClickTolerance: 2,
-    buffer: 5
+    buffer: 5,
   },
 
   _featureIsClicked: {},
@@ -63,6 +68,7 @@ module.exports = L.TileLayer.Canvas.extend({
     var self = this;
     self.mvtSource = mvtSource;
     L.Util.setOptions(this, options);
+    this.options.pointType = MVTFeature.constants.POINT_ICON; //options.pointType || MVTFeature.constants.POINT_CIRCLE;
 
     this.style = options.style;
     this.name = options.name;
@@ -208,8 +214,16 @@ module.exports = L.TileLayer.Canvas.extend({
 
       //Create a new MVTFeature if one doesn't already exist for this feature.
       if (!mvtFeature) {
+
         //Get a style for the feature - set it just once for each new MVTFeature
         var style = self.style(vtf);
+
+        // TODO: temp, remove once we can forward iconUrl from feature.properties
+        style.iconUrl = MVTFeature.constants.DEFAULT_ICON_URL
+
+        // TODO: pull this up a layer of abstraction
+        // TODO: make configurable on layer level
+       style.pointType = (this.options.pointType == MVTFeature.constants.POINT_ICON && style.iconUrl) ? MVTFeature.constants.POINT_ICON : MVTFeature.constants.POINT_CIRCLE;
 
         //create a new feature
         self.features[uniqueID] = mvtFeature = new MVTFeature(self, vtf, layerCtx, uniqueID, style);
