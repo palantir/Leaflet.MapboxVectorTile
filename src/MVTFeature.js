@@ -5,16 +5,7 @@
 var Util = require('./MVTUtil');
 var StaticLabel = require('./StaticLabel/StaticLabel.js');
 
-var constants = {
-        POINT_CIRCLE: "pt_circle",
-        POINT_ICON: "pt_icon",
-        DEFAULT_ICON_URL: "https://qph.is.quoracdn.net/main-qimg-c73e4e4396325a9e636ad2b94b64601f?convert_to_webp=true"
-};
-
-module.exports = {
-    MVTFeature: MVTFeature,
-    constants: constants
-};
+module.exports = MVTFeature;
 
 function MVTFeature(mvtLayer, vtf, ctx, id, style) {
   if (!vtf) return null;
@@ -44,6 +35,8 @@ function MVTFeature(mvtLayer, vtf, ctx, id, style) {
 
   //An object to store the paths and contexts for this feature
   this.tiles = {};
+
+  // TODO: think about this design
   this.mvtLayer.imgCache = {};
 
   this.style = style;
@@ -274,10 +267,10 @@ MVTFeature.prototype._drawPoint = function(ctx, coordsArray, style) {
     return;
   }
 
-  if (style.pointType === constants.POINT_CIRCLE){
-    this._drawPointCircle(ctx, ctx2d, p, style);
-  } else {
+  if ('iconUrl' in style){
     this._drawPointIcon(ctx, ctx2d, p, style); 
+  } else {
+    this._drawPointCircle(ctx, ctx2d, p, style);
   }
 
   tile.paths.push([p]);
@@ -311,7 +304,7 @@ MVTFeature.prototype._drawPointCircle = function(ctx, ctx2d, p, style) {
 
 MVTFeature.prototype._drawPointIcon = function(ctx, ctx2d, p, style){
 
-    var url = style.iconUrl || constants.DEFAULT_ICON_URL;
+    var url = style.iconUrl;
     var $img;
     if (!(url in this.mvtLayer.imgCache)){
         $img = $(new Image()).attr('src', url);
@@ -320,14 +313,22 @@ MVTFeature.prototype._drawPointIcon = function(ctx, ctx2d, p, style){
         $img = this.mvtLayer.imgCache[url];
     }
 
-    // TODO: configure size (via radius?)
+    //Get radius
+    var radius = 1;
+    if (typeof style.radius === 'function') {
+      radius = style.radius(ctx.zoom); //Allows for scale dependent rednering
+    }
+    else {
+      radius = style.radius;
+    }
+
     var img = $img.get(0);
     if (img.complete){
-        ctx2d.drawImage(img, p.x, p.y, 20, 20);
+        ctx2d.drawImage(img, p.x, p.y, radius*2, radius*2);
     } else {
         (function(x,y){
             $img.load(function(){
-                ctx2d.drawImage(this, x, y, 20, 20);
+                ctx2d.drawImage(this, x, y, radius*2, radius*2);
             });
         })(p.x, p.y);
     }
