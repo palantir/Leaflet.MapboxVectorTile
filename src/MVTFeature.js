@@ -37,7 +37,7 @@ function MVTFeature(mvtLayer, vtf, ctx, id, style) {
   this.tiles = {};
 
   // TODO: think about this design
-  this.mvtLayer.imgCache = {};
+  this.mvtLayer.imgCache = this.mvtLayer.imgCache || {};
 
   this.style = style;
 
@@ -305,12 +305,15 @@ MVTFeature.prototype._drawPointCircle = function(ctx, ctx2d, p, style) {
 MVTFeature.prototype._drawPointIcon = function(ctx, ctx2d, p, style){
 
     var url = style.iconUrl;
-    var $img;
+    var img;
+    console.log(style);
+    console.log(this.mvtLayer.imgCache);
     if (!(url in this.mvtLayer.imgCache)){
-        $img = $(new Image()).attr('src', url);
-        this.mvtLayer.imgCache[url] = $img;
+        img = new Image();
+        img.src = url;
+        this.mvtLayer.imgCache[url] = img;
     } else {
-        $img = this.mvtLayer.imgCache[url];
+        img = this.mvtLayer.imgCache[url];
     }
 
     //Get radius
@@ -322,12 +325,13 @@ MVTFeature.prototype._drawPointIcon = function(ctx, ctx2d, p, style){
       radius = style.radius;
     }
 
-    var img = $img.get(0);
     if (img.complete){
+        console.log("complete rendering " + img.src);
         ctx2d.drawImage(img, p.x, p.y, radius*2, radius*2);
     } else {
         (function(x,y){
-            $img.load(function(){
+            $(img).load(function(){
+                console.log("load cb rendering " + this.src);
                 ctx2d.drawImage(this, x, y, radius*2, radius*2);
             });
         })(p.x, p.y);
