@@ -306,8 +306,6 @@ MVTFeature.prototype._drawPointIcon = function(ctx, ctx2d, p, style){
 
     var url = style.iconUrl;
     var img;
-    console.log(style);
-    console.log(this.mvtLayer.imgCache);
     if (!(url in this.mvtLayer.imgCache)){
         img = new Image();
         img.src = url;
@@ -326,13 +324,11 @@ MVTFeature.prototype._drawPointIcon = function(ctx, ctx2d, p, style){
     }
 
     if (img.complete){
-        console.log("complete rendering " + img.src);
-        ctx2d.drawImage(img, p.x, p.y, radius*2, radius*2);
+        ctx2d.drawImage(img, p.x - radius, p.y - radius, radius*2, radius*2);
     } else {
         (function(x,y){
             $(img).load(function(){
-                console.log("load cb rendering " + this.src);
-                ctx2d.drawImage(this, x, y, radius*2, radius*2);
+                ctx2d.drawImage(this, x - radius, y - radius, radius*2, radius*2);
             });
         })(p.x, p.y);
     }
