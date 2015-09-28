@@ -52,9 +52,7 @@ module.exports = L.Control.MVTLayers = L.Control.Layers.extend({
 		layer.on('add remove', this._onLayerChange, this);
 
 		var id = L.stamp(layer);
-
-        var vtLayers = layer.getLayers();
-        var names = vtLayers ? vtLayers : [name];
+        var names = layer.getLayers ? layer.getLayers() : [name];
 
         for (var n in names){
             this._nameToLayer[n] = id;
