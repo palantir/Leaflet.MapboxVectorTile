@@ -76,6 +76,10 @@ declare module L {
             featureAtContainerPoint(containerPoint: Point): LeafletMVT.Feature;
         }
     }
+    module Control {
+        export Interface MVTLayers extends L.Control.Layers {
+        }
+    }
     interface TileLayerStatic {
         MVTSource: {
             /**
