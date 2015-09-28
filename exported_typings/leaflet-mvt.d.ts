@@ -90,7 +90,7 @@ declare module L {
     }
     interface ControlStatic {
         MVTLayers: {
-            new(baseLayers: L.ILayer[], overlayLayers: L.ILayer[], options: Options): Control.MVTLayers;
+            new(baseLayers: {[name: string]: L.ILayer[]; }, overlayLayers: {[name: string]: L.ILayer[];}, options: Options): Control.MVTLayers;
         }
     }
 }
