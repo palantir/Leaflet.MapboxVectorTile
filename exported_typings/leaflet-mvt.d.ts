@@ -63,6 +63,7 @@ declare module LeafletMVT {
         onClick?: (e: L.LeafletMouseEvent) => any;
         buffer?: number;
         xhrHeaders?: {[key: string]: string};
+        zIndex?: number;
     }
 }
 
