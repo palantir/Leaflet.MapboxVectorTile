@@ -8,4 +8,8 @@
  * @license ISC
  */
 
-module.exports = require('./MVTSource');
+module.exports = {};
+module.exports.MVTSource = require('./MVTSource');
+module.exports.Control = {
+    MVTLayers: require("./control/Control.MVTLayers")
+};
