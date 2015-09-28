@@ -62,6 +62,8 @@ declare module LeafletMVT {
         visibleLayers?: string[] | {[name: string]: string};
         onClick?: (e: L.LeafletMouseEvent) => any;
         buffer?: number;
+        xhrHeaders?: {[key: string]: string};
+        zIndex?: number;
     }
 }
 
@@ -81,5 +83,14 @@ declare module L {
               */
             new(options: LeafletMVT.Options): TileLayer.MVTSource;
         };
+    }
+    module Control {
+        export interface MVTLayers extends L.Control.Layers {
+        }
+    }
+    interface ControlStatic {
+        MVTLayers: {
+            new(baseLayers: {[name: string]: L.ILayer[]; }, overlayLayers: {[name: string]: L.ILayer[];}, options: Options): Control.MVTLayers;
+        }
     }
 }
