@@ -5,8 +5,8 @@
 module.exports = L.Control.MVTLayers = L.Control.Layers.extend({
 
 	initialize: function (baseLayers, overlays, options) {
-
-        /*
+        FOO = [];
+        this._nameToLayer = {};
 		L.setOptions(this, options);
 
 		this._layers = {};
@@ -14,19 +14,16 @@ module.exports = L.Control.MVTLayers = L.Control.Layers.extend({
 		this._handlingClick = false;
 
 		for (var i in baseLayers) {
-			this._addLayer(baseLayers[i], i);
+			this._addLayer(baseLayers[i], i, false);
 		}
 
 		for (i in overlays) {
 			this._addLayer(overlays[i], i, true);
 		}
-        */
-        L.Control.Layers.prototype.initialize.call(this, baseLayers, overlays, options);
-        this._nameToLayer = {};
 	},
 
 	addBaseLayer: function (layer, name) {
-		this._addLayer(layer, name);
+		this._addLayer(layer, name, false);
 		return this._update();
 	},
 
@@ -51,8 +48,31 @@ module.exports = L.Control.MVTLayers = L.Control.Layers.extend({
 	_addLayer: function (layer, name, overlay) {
 		layer.on('add remove', this._onLayerChange, this);
 
+        console.log("_addLayer " + name + " " + overlay);
+        console.log(layer);
+        if (overlay && Object.keys(layer.getLayers()).length === 0){
+            console.log("attaching callback");
+            var onTileLoad = function(mvtSource){
+                console.log("running callback");
+                mvtSource.options.visibleLayers = Object.keys(mvtSource.getLayers());
+                this._addReadyLayer(mvtSource, name, overlay);
+                this._update();
+            };
+            layer.options.onTilesLoaded = onTileLoad.bind(this);
+        } else {
+            this._addReadyLayer(layer, name, overlay);
+        }
+        console.log('added layer');
+        console.log(this._layers);
+    },
+
+    _addReadyLayer: function(layer, name, overlay) {
+        console.log("loading ready layer, overlay " + overlay);
+        console.log(layer);
 		var id = L.stamp(layer);
-        var names = layer.getLayers ? layer.getLayers() : [name];
+        var base = {}; base[name] = layer;
+        var names = layer.getLayers ? layer.getLayers() : base;
+        console.log("Names are " + JSON.stringify(Object.keys(names)));
 
         for (var n in names){
             this._nameToLayer[n] = id;
@@ -117,24 +137,31 @@ module.exports = L.Control.MVTLayers = L.Control.Layers.extend({
 
 	_addItem: function (obj) {
         var items = [];
-        for (var layerName in obj.names){
+        console.log(obj);
+        console.log(obj.names);
+        FOO.push(obj);
+        for (var layerName in obj.names) {
+            console.log("adding sublayer " + layerName);
             var label = document.createElement('label'),
                 //checked = this._map.hasLayer(obj.layer),
-                checked = isVisible(obj.layer, layerName),
+                checked = this.isVisible(obj.layer, layerName, obj.overlay),
                 input;
 
-            if (obj.overlay) {
-                input = document.createElement('input');
-                input.type = 'checkbox';
-                input.className = 'leaflet-control-layers-selector';
-                input.defaultChecked = checked;
+            if (obj.overlay){
+                    console.log('Adding overlay elt');
+                    input = document.createElement('input');
+                    input.type = 'checkbox';
+                    input.className = 'leaflet-control-layers-selector';
+                    input.defaultChecked = checked;
+
             } else {
                 input = this._createRadioElement('leaflet-base-layers', checked);
             }
 
             input.layerData = {
                 layerId: L.stamp(obj.layer),
-                name: layerName
+                name: layerName,
+                overlay: obj.overlay
             };
 
             L.DomEvent.on(input, 'click', this._onInputClick, this);
@@ -168,38 +195,80 @@ module.exports = L.Control.MVTLayers = L.Control.Layers.extend({
 
 		for (var i = inputs.length - 1; i >= 0; i--) {
 			input = inputs[i];
-			layer = this._layers[input.layerData].layerId;
+			layer = this._layers[input.layerData.layerId].layer;
             name  = input.layerData.name;
-			hasLayer = isVisible(layer, name);
+            overlay = input.layerData.overlay;
+			hasLayer = this.isVisible(layer, name, overlay);
+            console.log("Layer " + name + " " + overlay + " " + hasLayer);
+            console.log("Checked: " + input.checked);
 
 			if (input.checked && !hasLayer) {
-				addedLayers.push(layer);
+                console.log("Going to add " + name);
+				addedLayers.push({l: layer, n: name, o: overlay});
 
 			} else if (!input.checked && hasLayer) {
-				removedLayers.push(layer);
+                console.log("Going to remove " + name);
+				removedLayers.push({l: layer, n: name, o: overlay});
 			}
 		}
 
 		// Bugfix issue 2318: Should remove all old layers before readding new ones
 		for (i = 0; i < removedLayers.length; i++) {
 			//this._map.removeLayer(removedLayers[i]);
-            layer.hideLayer(name);
+            var remLayer = removedLayers[i];
+            this.hideLayer(remLayer.l, remLayer.n, remLayer.o);
 		}
 		for (i = 0; i < addedLayers.length; i++) {
 			//this._map.addLayer(addedLayers[i]);
-            layer.showLayer(name);
+            var aLayer = addedLayers[i];
+            this.showLayer(aLayer.l, aLayer.n, aLayer.o);
 		}
 
 		this._handlingClick = false;
 
 		this._refocusOnMap();
 	},
+
+    showLayer: function(layer, name, overlay) {
+        console.log("showing layer " + name + " "+ overlay);
+        console.log(layer);
+        if (overlay){
+            layer.showLayer(name);
+            this._map.addLayer(layer);
+        } else {
+            this._map.addLayer(layer);
+        }
+    },
+
+    hideLayer: function(layer, name, overlay) {
+        console.log("hiding layer " + name);
+        if (overlay){
+            layer.hideLayer(name);
+        } else {
+            this._map.removeLayer(layer);
+        }
+    },
+
+    isVisible: function (layer, name, overlay) {
+        if (overlay) {
+            var vis = layer.options.visibleLayers;
+            console.log("visible");
+            console.log(layer.options.visibleLayers);
+            return vis && vis.indexOf(name) != -1;
+        } else {
+            return this._map.hasLayer(layer);
+        }
+    }
 });
 
 L.control.mvtLayers = function (baseLayers, overlays, options) {
 	return new L.Control.MVTLayers(baseLayers, overlays, options);
 };
 
-function isVisible(layer, name){
-    return layer.options.visibleLayers.indexOf(name) != -1;
-}
+
+L.DomUtil.empty = function (el) {
+    while (el.firstChild) {
+        el.removeChild(el.firstChild);
+    }
+};
+
