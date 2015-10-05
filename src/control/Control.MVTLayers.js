@@ -7,6 +7,8 @@ module.exports = L.Control.MVTLayers = L.Control.Layers.extend({
 	initialize: function (baseLayers, overlays, options) {
 		L.setOptions(this, options);
 
+        // Map from vector layer name to presented name in toggle
+        this._layerNames = this.options.layerNames || {};
 		this._layers = {};
 		this._lastZIndex = 0;
 		this._handlingClick = false;
@@ -24,7 +26,8 @@ module.exports = L.Control.MVTLayers = L.Control.Layers.extend({
 
         var onTileLoad = function(mvtSrc){
             for (var key in mvtSrc.getLayers()){
-                this.addOverlay(mvtSrc.layers[key], key);
+                var name = this._layerNames[key] || key;
+                this.addOverlay(mvtSrc.layers[key], name);
             }
             this._update();
         }
