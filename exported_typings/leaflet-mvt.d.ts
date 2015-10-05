@@ -65,6 +65,10 @@ declare module LeafletMVT {
         xhrHeaders?: {[key: string]: string};
         zIndex?: number;
     }
+
+    export interface MVTLayersOptions extends L.LayersOptions {
+         layerNames: { [layerName: string]: string; };
+    }
 }
 
 declare module L {
@@ -90,7 +94,7 @@ declare module L {
     }
     interface ControlStatic {
         MVTLayers: {
-            new(baseLayers?: any, overlayLayers?: any, options?: L.LayersOptions): Control.MVTLayers;
+            new(baseLayers?: any, overlayLayers?: any, options?: LeafletMVT.MVTLayersOptions): Control.MVTLayers;
         }
     }
 }
