@@ -112,6 +112,10 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
 
     map.on('click', this._onClick, this);
 
+    if (this.options.onHover){
+        map.on('mousemove', this._onHover, this);
+    }
+
     this.addChildLayers(map);
 
     if (typeof DynamicLabel === 'function' ) {
@@ -413,6 +417,14 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
       }
     }
     return null;
+  },
+
+  _onHover: function(evt) {
+    var self = this;
+    var onHover = self.options.onHover;
+    if (typeof onHover === 'function'){
+        onHover(self, evt);
+    }
   },
 
   _onClick: function(evt) {
