@@ -368,6 +368,11 @@ MVTFeature.prototype._drawPolygon = function(ctx, coordsArray, style) {
   if (!ctx || !ctx.canvas) return;
 
   var ctx2d = ctx.canvas.getContext('2d');
+
+  // Save and render feature w/ specified alpha
+  var preAlpha = ctx2d.globalAlpha;
+  cxt2d.globalAlpha = style.opacity || preAlpha;
+
   var outline = style.outline;
 
   // color may be defined via function to make choropleth work right
@@ -411,6 +416,8 @@ MVTFeature.prototype._drawPolygon = function(ctx, coordsArray, style) {
 
   tile.paths.push(projCoords);
 
+  // Restore alpha
+  ctx2d.globalAlpha = preAlpha;
 };
 
 MVTFeature.prototype._drawStaticLabel = function(ctx, coordsArray, style) {
