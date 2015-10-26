@@ -377,7 +377,6 @@ MVTFeature.prototype._drawLineString = function(ctx, coordsArray, style) {
 MVTFeature.prototype._drawPolygon = function(ctx, coordsArray, style) {
   if (!style) return;
   if (!ctx || !ctx.canvas) return;
-  console.log("MVTFeature: style is " + JSON.stringify(style));
 
   var ctx2d = ctx.canvas.getContext('2d');
 
