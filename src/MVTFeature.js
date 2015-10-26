@@ -372,7 +372,7 @@ MVTFeature.prototype._drawPolygon = function(ctx, coordsArray, style) {
 
   // Save and render feature w/ specified alpha
   var preAlpha = ctx2d.globalAlpha;
-  cxt2d.globalAlpha = style.opacity || preAlpha;
+  ctx2d.globalAlpha = style.opacity || preAlpha;
 
   var outline = style.outline;
 
