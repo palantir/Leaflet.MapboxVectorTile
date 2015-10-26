@@ -267,16 +267,22 @@ MVTFeature.prototype._drawPoint = function(ctx, coordsArray, style) {
     return;
   }
 
+  // Save and render feature w/ specified alpha
+  var preAlpha = ctx2d.globalAlpha;
+  ctx2d.globalAlpha = style.opacity || preAlpha;
+
   if ('iconUrl' in style){
     this._drawPointIcon(ctx, ctx2d, p, style); 
   } else {
     this._drawPointCircle(ctx, ctx2d, p, style);
   }
 
+  ctx2d.globalAlpha = preAlpha;
   tile.paths.push([p]);
 };
 
 MVTFeature.prototype._drawPointCircle = function(ctx, ctx2d, p, style) {
+   
 
   //Get radius
   var radius = 1;
@@ -338,6 +344,10 @@ MVTFeature.prototype._drawLineString = function(ctx, coordsArray, style) {
   if (!style) return;
   if (!ctx || !ctx.canvas) return;
 
+  // Save and render feature w/ specified alpha
+  var preAlpha = ctx2d.globalAlpha;
+  ctx2d.globalAlpha = style.opacity || preAlpha;
+
   var ctx2d = ctx.canvas.getContext('2d');
   ctx2d.strokeStyle = style.color;
   ctx2d.lineWidth = style.size;
@@ -359,6 +369,7 @@ MVTFeature.prototype._drawLineString = function(ctx, coordsArray, style) {
 
   ctx2d.stroke();
   ctx2d.restore();
+  ctx2d.globalAlpha = preAlpha;
 
   tile.paths.push(projCoords);
 };
@@ -414,11 +425,10 @@ MVTFeature.prototype._drawPolygon = function(ctx, coordsArray, style) {
   if (outline) {
     ctx2d.stroke();
   }
-
-  tile.paths.push(projCoords);
-
   // Restore alpha
   ctx2d.globalAlpha = preAlpha;
+
+  tile.paths.push(projCoords);
 };
 
 MVTFeature.prototype._drawStaticLabel = function(ctx, coordsArray, style) {
