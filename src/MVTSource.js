@@ -17,6 +17,7 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
     xhrHeaders: {}
   },
   layers: {}, //Keep a list of the layers contained in the PBFs
+  activeLayers: {}, //Keep a list of the layers that are currently visible
   processedTiles: {}, //Keep a list of tiles that have been processed already
   _eventHandlers: {},
   _triggerOnTilesLoadedEvent: true, //whether or not to fire the onTilesLoaded event when all of the tiles finish loading.
@@ -67,6 +68,7 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
 
     //a list of the layers contained in the PBFs
     this.layers = {};
+    this.activeLayers = {};
 
     // tiles currently in the viewport
     this.activeTiles = {};
@@ -278,6 +280,7 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
     if (!self.layers[key]) {
       //Create MVTLayer or MVTPointLayer for user
       self.layers[key] = self.createMVTLayer(key, lyr.parsedFeatures[0].type || null);
+      self.activeLayers[key] = true;
     }
 
     if (parsed) {
@@ -331,6 +334,7 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
   hideLayer: function(id) {
     if (this.layers[id]) {
       this._map.removeLayer(this.layers[id]);
+      this.activeLayers[id] = false;
       var visibleLayers = this.options.visibleLayers;
       if (visibleLayers) {
         if (Array.isArray(visibleLayers) && visibleLayers.indexOf(id) > -1) {
@@ -345,6 +349,7 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
   showLayer: function(id) {
     if (this.layers[id]) {
       this._map.addLayer(this.layers[id]);
+      this.activeLayers[id] = true;
       var visibleLayers = this.options.visibleLayers;
       if (visibleLayers) {
         if (Array.isArray(visibleLayers)) {
@@ -410,10 +415,12 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
 
     // TODO: Z-ordering?  Clickable?
     for (var key in layers) {
-      var layer = layers[key];
-      var feature = layer.featureAt(tilePoint.tileID, tilePoint);
-      if (feature) {
-        return feature;
+      if (this.activeLayers[key]){
+          var layer = layers[key];
+          var feature = layer.featureAt(tilePoint.tileID, tilePoint);
+          if (feature) {
+            return feature;
+          }
       }
     }
     return null;
