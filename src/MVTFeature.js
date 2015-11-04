@@ -344,11 +344,12 @@ MVTFeature.prototype._drawLineString = function(ctx, coordsArray, style) {
   if (!style) return;
   if (!ctx || !ctx.canvas) return;
 
+  var ctx2d = ctx.canvas.getContext('2d');
+
   // Save and render feature w/ specified alpha
   var preAlpha = ctx2d.globalAlpha;
   ctx2d.globalAlpha = style.opacity || preAlpha;
 
-  var ctx2d = ctx.canvas.getContext('2d');
   ctx2d.strokeStyle = style.color;
   ctx2d.lineWidth = style.size;
   ctx2d.beginPath();
