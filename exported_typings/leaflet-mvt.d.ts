@@ -56,7 +56,7 @@ declare module LeafletMVT {
         debug?: boolean;
         clickableLayers?: string[];
         mutexToggle?: boolean;
-        getIDForLayerFeature: (feature: LeafletMVT.VectorTileFeature) => string;
+        getIDForLayerFeature?: (feature: LeafletMVT.VectorTileFeature) => string;
         filter: (feature: LeafletMVT.VectorTileFeature) => boolean;
         style?: LeafletMVT.StyleFunction | {[name: string]: LeafletMVT.StyleFunction};
         visibleLayers?: string[] | {[name: string]: string};
