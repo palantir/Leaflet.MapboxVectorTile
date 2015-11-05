@@ -107,7 +107,7 @@ module.exports = L.TileLayer.Canvas.extend({
 
   _initializeFeaturesHash: function(ctx){
     this._canvasIDToFeatures[ctx.id] = {
-      features: [],
+      features: {},
       canvas: ctx.canvas,
       index: rbush(9)
     };
@@ -225,7 +225,7 @@ module.exports = L.TileLayer.Canvas.extend({
       }
 
       //Associate & Save this feature with this tile for later
-      self._canvasIDToFeatures[layerCtx.id].features.push(mvtFeature);
+      self._canvasIDToFeatures[layerCtx.id].features[uniqueID] = mvtFeature;
 
     }
     self._canvasIDToFeatures[layerCtx.id].index.load(toIndex);
@@ -235,12 +235,18 @@ module.exports = L.TileLayer.Canvas.extend({
      * of TileLayer.MVTSource.js
      */
     var layerOrdering = self.options.layerOrdering;
+    sortedLayerOrder = Object.keys(self._canvasIDToFeatures[layerCtx.id].features);
     if (layerOrdering) {
       //We've assigned the custom zIndex property when iterating above.  Now just sort.
-      self._canvasIDToFeatures[layerCtx.id].features = self._canvasIDToFeatures[layerCtx.id].features.sort(function(a, b) {
-        return -(b.properties.zIndex - a.properties.zIndex)
+      sortedLayerOrder.sort(function(a, b) {
+        var fa = self._canvasIDToFeatures[layerCtx.id].features[a];
+        var fb = self._canvasIDToFeatures[layerCtx.id].features[b];
+
+        return -(fb.properties.zIndex - fa.properties.zIndex)
       });
     }
+    self._canvasIDToFeatures[layerCtx.id].layerOrder = sortedLayerOrder;
+    
 
     self.redrawTile(layerCtx.id);
   },
@@ -413,8 +419,10 @@ module.exports = L.TileLayer.Canvas.extend({
     var selectedFeatures = [];
 
     // drawing all of the non-selected features
-    for (var i = 0; i < features.length; i++) {
-      var feature = features[i];
+    var layerOrder = featfeats.layerOrder;
+    for (var i = 0; i < layerOrder.length; i++) {
+      var uid = layerOrder[i];
+      var feature = features[uid];
       if (feature.selected) {
         selectedFeatures.push(feature);
       } else {

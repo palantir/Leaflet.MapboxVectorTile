@@ -120,7 +120,7 @@ MVTFeature.prototype.draw = function(canvasID) {
   //Get the info from the tiles list
   var tileInfo =  this.tiles[canvasID];
 
-  var vtf = tileInfo.vtf;
+  var vtfs = tileInfo.vtfs;
   var ctx = tileInfo.ctx;
 
   //Get the actual canvas from the parent layer's _tiles object.
@@ -137,29 +137,31 @@ MVTFeature.prototype.draw = function(canvasID) {
     var style = this.style;
   }
 
-  switch (vtf.type) {
-    case 1: //Point
-      this._drawPoint(ctx, vtf.coordinates, style);
-      if (!this.staticLabel && typeof this.style.staticLabel === 'function') {
-        if (this.style.ajaxSource && !this.ajaxData) {
+  for (var i = 0; i < vtfs.length; i++) {
+      var vtf = vtfs[i];
+      switch (vtf.type) {
+        case 1: //Point
+          this._drawPoint(ctx, vtf.coordinates, style);
+          if (!this.staticLabel && typeof this.style.staticLabel === 'function') {
+            if (this.style.ajaxSource && !this.ajaxData) {
+              break;
+            }
+            this._drawStaticLabel(ctx, vtf.coordinates, style);
+          }
           break;
-        }
-        this._drawStaticLabel(ctx, vtf.coordinates, style);
+
+        case 2: //LineString
+          this._drawLineString(ctx, vtf.coordinates, style);
+          break;
+
+        case 3: //Polygon
+          this._drawPolygon(ctx, vtf.coordinates, style);
+          break;
+
+        default:
+          throw new Error('Unmanaged type: ' + vtf.type);
       }
-      break;
-
-    case 2: //LineString
-      this._drawLineString(ctx, vtf.coordinates, style);
-      break;
-
-    case 3: //Polygon
-      this._drawPolygon(ctx, vtf.coordinates, style);
-      break;
-
-    default:
-      throw new Error('Unmanaged type: ' + vtf.type);
-  }
-
+    }
 };
 
 MVTFeature.prototype.getPathsForTile = function(canvasID) {
@@ -180,12 +182,15 @@ MVTFeature.prototype.addTileFeature = function(vtf, ctx) {
 
   if(ctx.zoom != zoom) return;
 
-  this.tiles[ctx.id] = {
-    ctx: ctx,
-    vtf: vtf,
-    paths: []
-  };
-
+  if (!this.tiles[ctx.id]) {
+      this.tiles[ctx.id] = {
+        ctx: ctx,
+        vtfs: [vtf],
+        paths: []
+      }
+  } else {
+    this.tiles[ctx.id].vtfs.push(vtf);
+  }
 };
 
 
