@@ -3,6 +3,8 @@ var Protobuf = require('pbf');
 var Point = require('point-geometry');
 var Util = require('./MVTUtil');
 var MVTLayer = require('./MVTLayer');
+var DefaultTileSource = require('./TileSource/DefaultTileSource')
+var IE9TileSource = require('./TileSource/IE9TileSource')
 
 
 module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
@@ -195,20 +197,27 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
     if (!this._url) return;
     var src = this.getTileUrl({ x: ctx.tile.x, y: ctx.tile.y, z: ctx.zoom });
 
-    var xhr = new XMLHttpRequest();
-    xhr.onload = function() {
+    var tileSource;
+    if (isIE9()) {
+      tileSource = new IE9TileSource(src);
+    } else {
+      tileSource = new DefaultTileSource(src);
+    }
+
+    tileSource.onTileLoad(function(tileBytes, xhr) {
       if (xhr.status == "200") {
+        if(tileBytes == null) return;
 
-        if(!xhr.response) return;
-
-        var arrayBuffer = new Uint8Array(xhr.response);
+        var arrayBuffer = new Uint8Array(tileBytes);
         var buf = new Protobuf(arrayBuffer);
         var vt = new VectorTile(buf);
+
         // Check the attachment status of the layer.
         if (!self.map) {
           console.log("Fetched tile for removed map.");
           return;
         }
+
         // Check the current map layer zoom.  If fast zooming is occurring, then short circuit tiles that are for a different zoom level than we're currently on.
         if (self.map.getZoom() != ctx.zoom) {
           console.log("Fetched tile for zoom level " + ctx.zoom + ". Map is at zoom level " + self.map.getZoom());
@@ -219,19 +228,8 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
 
       //either way, reduce the count of tilesToProcess tiles here
       self.reduceTilesToProcessCount();
-    };
-
-    xhr.onerror = function() {
-      console.log("xhr error: " + xhr.status)
-    };
-
-    xhr.open('GET', src, true); //async is true
-    var headers = self.options.xhrHeaders;
-    for (var header in headers) {
-      xhr.setRequestHeader(header, headers[header]);
-    }
-    xhr.responseType = 'arraybuffer';
-    xhr.send();
+    });
+    tileSource.send();
   },
 
   reduceTilesToProcessCount: function(){
@@ -564,4 +562,8 @@ function parseVTFeatures(vtl){
     vtl.parsedFeatures.push(vtf);
   }
   return vtl;
+}
+
+function isIE9() {
+  return window.navigator.userAgent.indexOf("MSIE 9.0;") != -1;
 }
