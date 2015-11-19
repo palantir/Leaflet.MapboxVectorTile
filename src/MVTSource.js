@@ -3,9 +3,8 @@ var Protobuf = require('pbf');
 var Point = require('point-geometry');
 var Util = require('./MVTUtil');
 var MVTLayer = require('./MVTLayer');
-var DefaultTileSource = require('./TileSource/DefaultTileSource')
-var IE9TileSource = require('./TileSource/IE9TileSource')
-
+var DefaultTileSource = require('./TileSource/DefaultTileSource');
+var IE9TileSource = require('./TileSource/IE9TileSource');
 
 module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
 

@@ -11,7 +11,7 @@ function DefaultTileSource(url) {
 
 DefaultTileSource.prototype.onTileLoad = function(tileHandlerFn) {
   this.tileHandlerFn = tileHandlerFn;
-}
+};
 
 DefaultTileSource.prototype.send = function(headers) {
   var onloadHandler = function() {
@@ -24,4 +24,4 @@ DefaultTileSource.prototype.send = function(headers) {
   }
   this.xhr.responseType = 'arraybuffer';
   this.xhr.send();
-}
+};
