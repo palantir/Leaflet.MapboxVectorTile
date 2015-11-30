@@ -203,12 +203,11 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
       tileSource = new DefaultTileSource(src);
     }
 
-    tileSource.onTileLoad(function(tileBytes, xhr) {
+    tileSource.onTileLoad(function(tileBuffer, xhr) {
       if (xhr.status == "200") {
-        if(tileBytes == null) return;
+        if(tileBuffer == null) return;
 
-        var arrayBuffer = new Uint8Array(tileBytes);
-        var buf = new Protobuf(arrayBuffer);
+        var buf = new Protobuf(tileBuffer);
         var vt = new VectorTile(buf);
 
         // Check the attachment status of the layer.

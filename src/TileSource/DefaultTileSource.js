@@ -15,7 +15,11 @@ DefaultTileSource.prototype.onTileLoad = function(tileHandlerFn) {
 
 DefaultTileSource.prototype.send = function(headers) {
   var onloadHandler = function() {
-    this.tileHandlerFn(this.xhr.response, this.xhr);
+    var responseData = null;
+    if (this.xhr.response != null) {
+      responseData = new Uint8Array(this.xhr.response);
+    }
+    this.tileHandlerFn(responseData, this.xhr);
   };
   this.xhr.onload = onloadHandler.bind(this);
   this.xhr.open('GET', this.url, true); //async is true
