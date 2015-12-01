@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/SpatialServer/Leaflet.MapboxVectorTile",
   "dependencies": {
+    "buffer":"3.5.2",
     "pbf": "0.0.2",
     "point-geometry": "0.0.0",
     "rbush": "^1.4.0",
