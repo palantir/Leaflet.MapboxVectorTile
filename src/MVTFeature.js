@@ -337,7 +337,6 @@ MVTFeature.prototype._drawPolygon = function(ctx, coordsArray, style) {
   }
   ctx2d.beginPath();
 
-  var projCoords = [];
   var tile = this.tiles[ctx.id];
 
   var featureLabel = this.dynamicLabel;
@@ -346,6 +345,7 @@ MVTFeature.prototype._drawPolygon = function(ctx, coordsArray, style) {
   }
 
   for (var gidx = 0, len = coordsArray.length; gidx < len; gidx++) {
+    var projCoords = [];
     var coords = coordsArray[gidx];
 
     for (var i = 0; i < coords.length; i++) {
@@ -355,6 +355,7 @@ MVTFeature.prototype._drawPolygon = function(ctx, coordsArray, style) {
       projCoords.push(proj);
       ctx2d[method](proj.x, proj.y);
     }
+    tile.paths.push(projCoords);
   }
 
   ctx2d.closePath();
@@ -363,15 +364,13 @@ MVTFeature.prototype._drawPolygon = function(ctx, coordsArray, style) {
     ctx2d.stroke();
   }
 
-  tile.paths.push(projCoords);
-
 };
 
 MVTFeature.prototype._drawStaticLabel = function(ctx, coordsArray, style) {
   if (!style) return;
   if (!ctx) return;
 
-  // If the corresponding layer is not on the map, 
+  // If the corresponding layer is not on the map,
   // we dont want to put on a label.
   if (!this.mvtLayer._map) return;
 
@@ -436,4 +435,3 @@ MVTFeature.prototype.linkedFeature = function() {
     return null;
   }
 };
-
