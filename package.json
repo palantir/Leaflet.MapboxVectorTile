@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "browserify": "~5.9.1",
-    "watchify": "1.0.1",
+    "watchify": "3.7.0",
     "serve": "^1.4.0",
     "tape": "2.14.0",
     "faucet": "0.0.1",
