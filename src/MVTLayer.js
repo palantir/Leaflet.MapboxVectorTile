@@ -169,6 +169,7 @@ module.exports = L.TileLayer.Canvas.extend({
     var toIndex = [];
     for (var i = 0, len = features.length; i < len; i++) {
       var vtf = features[i]; //vector tile feature
+      vtf.layer = vtl;
 
       /**
        * Apply filter on feature if there is one. Defined in the options object
@@ -320,11 +321,12 @@ module.exports = L.TileLayer.Canvas.extend({
 
           //Find the radius of the point.
           var radius = 3;
-          if (typeof feature.style.radius === 'function') {
-            radius = feature.style.radius(zoom); //Allows for scale dependent rednering
-          }
-          else{
-            radius = feature.style.radius;
+          if (feature.style) {
+            if (typeof feature.style.radius === 'function') {
+              radius = feature.style.radius(zoom); //Allows for scale dependent rednering
+            } else {
+              radius = feature.style.radius;
+            }
           }
 
           paths = feature.getPathsForTile(tileID);
