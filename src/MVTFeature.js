@@ -137,7 +137,7 @@ MVTFeature.prototype.draw = function(canvasID) {
   switch (vtf.type) {
     case 1: //Point
       this._drawPoint(ctx, vtf.coordinates, style);
-      if (!this.staticLabel && typeof this.style.staticLabel === 'function') {
+      if (!this.staticLabel && this.style && typeof this.style.staticLabel === 'function') {
         if (this.style.ajaxSource && !this.ajaxData) {
           break;
         }
