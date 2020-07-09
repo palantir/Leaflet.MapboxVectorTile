@@ -32,7 +32,9 @@ IE9TileSource.prototype.send = function(headers) {
   };
   this.xhr.onreadystatechange = onloadHandler.bind(this);
   this.xhr.open('GET', this.url, true); //async is true
+  console.log("Setting headers");
   for (var header in headers) {
+    console.log(header);
     this.xhr.setRequestHeader(header, headers[header]);
   }
   this.xhr.send();

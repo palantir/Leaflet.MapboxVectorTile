@@ -23,7 +23,9 @@ DefaultTileSource.prototype.send = function(headers) {
   };
   this.xhr.onload = onloadHandler.bind(this);
   this.xhr.open('GET', this.url, true); //async is true
+  console.log("Setting header");
   for (var header in headers) {
+    console.log(header);
     this.xhr.setRequestHeader(header, headers[header]);
   }
   this.xhr.responseType = 'arraybuffer';
