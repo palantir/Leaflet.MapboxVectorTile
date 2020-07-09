@@ -64,11 +64,6 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
 
 
   initialize: function(options) {
-
-    console.log("Initializing source with options");
-    console.log(options);
-    console.log("Printing options");
-
     L.Util.setOptions(this, options);
 
     //a list of the layers contained in the PBFs
