@@ -227,6 +227,8 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
       //either way, reduce the count of tilesToProcess tiles here
       self.reduceTilesToProcessCount();
     });
+    console.log("Nico was here");
+    console.log(this.options.xhrHeaders);
     tileSource.send(this.options.xhrHeaders);
   },
 
