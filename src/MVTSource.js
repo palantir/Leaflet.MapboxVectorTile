@@ -64,6 +64,11 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
 
 
   initialize: function(options) {
+
+    console.log("Initializing source with options");
+    console.log(options);
+    console.log("Printing options");
+
     L.Util.setOptions(this, options);
 
     //a list of the layers contained in the PBFs
@@ -227,8 +232,7 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
       //either way, reduce the count of tilesToProcess tiles here
       self.reduceTilesToProcessCount();
     });
-    console.log("Nico was here");
-    console.log(this.options.xhrHeaders);
+    console.log("Fetching tile with headers");
     tileSource.send(this.options.xhrHeaders);
   },
 
