@@ -61,6 +61,7 @@ declare module LeafletMVT {
         visibleLayers?: string[] | {[name: string]: string};
         onClick?: (e: L.LeafletMouseEvent) => any;
         buffer?: number;
+        xhrHeaders?: {[name: string]: string};
     }
 }
 
